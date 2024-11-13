@@ -35,12 +35,11 @@ like `radius`.
 
 Extension `KHR_LIGHT_DIRECTIONAL`
 
-The directional light is thought to
-be far away (outside of the scene), thus its light arrives (mostly) as
-parallel rays. It is created by passing the subtype string `directional` to
-<<object_types_light, `anariNewLight`>>. In addition to the <<object_types_light, general parameters>>
-understood by all lights, the directional light supports the following
-special parameters:
+The directional light is thought to be far away (outside of the scene), thus its
+light arrives (mostly) as parallel rays. It is created by passing the subtype
+string `directional` to <<object_types_light, `anariNewLight`>>. In addition to
+the <<object_types_light, general parameters>> understood by all lights, the
+directional light supports the following special parameters:
 
 .Additional <<api_concepts_parameters, parameters>> understood by the directional <<object_types_light, light>>.
 [cols="<4,<3,>2,<12",options="header,unbreakable"]
@@ -51,16 +50,28 @@ special parameters:
 | irradiance      |`FLOAT32`     |          1 | the amount of light arriving at a surface point,
                                                 assuming the light is oriented towards to the
                                                 surface, in W/m^2^
-| radiance        |`FLOAT32`     |          1 | the amount of light emitted in a direction, in W/sr/m^2^;
-                                               `irradiance` takes precedence if also specified
+| radiance        |`FLOAT32`     |            | alternative specification of the brightness (if
+						`irradiance` is not explicitly set): the amount of
+                                                light emitted in a direction, in W/sr/m^2^;
 |===================================================================================================
+
+If `irradiance` and `radiance` are both explicitly set, then `irradiance` takes precedence.
 
 [NOTE]
 .Note
 ==================
-Setting the angular diameter to a value greater than
-zero will result in soft shadows when supported by the implementation. For
-instance, the apparent size of the sun is about 0.53° or 0.00925 rad.
+The main way to specify the brightness of the directional light via `irradiance`
+and its alternative specification via `radiance` differ in their behavior when
+the `angularDiameter` is changing: With `irradiance`, increasing the angular
+diameter will result in softer shadows (when soft shadows are supported by the
+implementation), but the overall brightness in the scene stays roughly the same.
+With `radiance` however, increasing the angular diameter will also result in a
+brighter illumination in the scene.
+Using `radiance` is only meaninful if `angularDiameter` is larger than zero
+(otherwise the directional light is not emitting any light).
+
+Using a direction light with an angular diameter is a good approximation for
+sunlight: the apparent size of the sun is about 0.53° or 0.00925 rad.
 ==================
 
 
@@ -98,23 +109,30 @@ Extension `KHR_LIGHT_POINT`
 
 The point light (or with `radius > 0` the sphere light) is a light emitting
 uniformly in all directions (from the surface toward the outside). It is created
-by passing the subtype string `point` to <<object_types_light, `anariNewLight`>>. In addition to the
-<<object_types_light, general parameters>> understood by all lights, the point light supports
-the following special parameters:
+by passing the subtype string `point` to <<object_types_light,
+`anariNewLight`>>. In addition to the <<object_types_light, general parameters>>
+understood by all lights, the point light supports the following special
+parameters:
 
 .Additional <<api_concepts_parameters, parameters>> understood by the point <<object_types_light, light>>.
 [cols="<,<2,>,<6",options="header,unbreakable"]
 |===================================================================================================
-| Name       | Type         |    Default | Description
-| position   |`FLOAT32_VEC3`|  (0, 0, 0) | the position of the point light
-| radius   |`FLOAT32`|       0 | the size of the point light (becoming a sphere)
-| intensity  |`FLOAT32`     |          1 | the overall amount of light emitted by the light in a
-                                           direction, in W/sr
-| power      |`FLOAT32`     |          1 | the overall amount of light energy emitted, in W;
-                                          `intensity` takes precedence if also specified
-| radiance |`FLOAT32`|       1 | the amount of light emitted by a point on the light source in a direction,
-                                 in W/sr/m^2^; `intensity` (or `power`) takes precedence if also specified
+| Name      | Type         |    Default | Description
+| position  |`FLOAT32_VEC3`|  (0, 0, 0) | the position of the point light
+| radius    |`FLOAT32`     |          0 | the size of the point light (becoming a sphere)
+| intensity |`FLOAT32`     |          1 | the overall amount of light emitted by the light in a
+                                          direction, in W/sr
+| power     |`FLOAT32`     |            | alternative specification of the brightness (if
+					  `intensity` is not explicitly set): the overall amount of
+                                          light energy emitted, in W;
+| radiance  |`FLOAT32`     |            | alternative specification of the brightness (if neither
+					  `intensity` nor `power` is explicitly set): the amount of
+					  light emitted by a point on the light source in a
+                                          direction, in W/sr/m^2^
 |===================================================================================================
+
+The precedence order is `intensity`, `power`, `radiance`: the first (in this
+ordering) explicitly set parameter is used.
 
 
 [[object_types_light_quad]]
